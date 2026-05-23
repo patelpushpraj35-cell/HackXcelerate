@@ -17,15 +17,16 @@ export default function App() {
         toastOptions={{
           duration: 4000,
           style: {
-            background: '#111111',
-            color: '#EDEDED',
-            border: '1px solid rgba(255, 23, 68, 0.25)',
-            borderRadius: '0px',
-            fontFamily: '"JetBrains Mono", monospace',
-            fontSize: '11px',
+            background: '#1E293B',
+            color: '#F1F5F9',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '13px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
           },
-          success: { iconTheme: { primary: '#A6FF00', secondary: '#050505' } },
-          error:   { iconTheme: { primary: '#FF1744', secondary: '#050505' } },
+          success: { iconTheme: { primary: '#10B981', secondary: '#1E293B' } },
+          error:   { iconTheme: { primary: '#EF4444', secondary: '#1E293B' } },
         }}
       />
       <Routes>
