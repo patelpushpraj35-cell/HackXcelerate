@@ -1,0 +1,35 @@
+# Datasets
+Dataset/
+dataset_split/
+*.zip
+*.tar.gz
+
+# Python virtual environment and dependencies
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node dependencies and builds
+node_modules/
+dist/
+
+# Local configuration files
+.env
+*.env
+local.py
+
+# Large machine learning models (optionally track config but ignore binary weights)
+*.h5
+*.pkl
+*.pb
+*.onnx
+models/

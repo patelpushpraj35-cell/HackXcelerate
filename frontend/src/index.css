@@ -1,0 +1,404 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════
+   TRUTHLENS AI COMSPEC — DESIGN SYSTEM
+   Tactical Cyber-Defense & Neural Surveillance Operating System
+   Colors: Matte Black (#050505), Graphite (#111111), Deep Crimson (#FF1744),
+           Electric Orange (#FF6B00), Toxic Lime (#A6FF00), Signal Amber (#FFC400),
+           White Smoke (#EDEDED)
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --bg-void:       #050505;
+  --bg-deep:       #111111;
+  --bg-panel:      #181818;
+  
+  --neon-red:      #FF1744;
+  --neon-orange:   #FF6B00;
+  --neon-green:    #A6FF00;
+  --neon-amber:    #FFC400;
+  
+  --glass:         rgba(17, 17, 17, 0.85);
+  --glass-border:  rgba(255, 23, 68, 0.16);
+  --glass-hover:   rgba(255, 107, 0, 0.06);
+  
+  --text-primary:  #EDEDED;
+  --text-secondary:#A3A3A3;
+  --text-dim:      #555555;
+
+  --radius:        4px;
+  --radius-lg:     6px;
+  --radius-xl:     8px;
+
+  --glow-red-sm:   0 0 10px rgba(255,23,68,0.3);
+  --glow-red:      0 0 20px rgba(255,23,68,0.4), 0 0 40px rgba(255,23,68,0.1);
+  --glow-orange:   0 0 20px rgba(255,107,0,0.3), 0 0 40px rgba(255,107,0,0.1);
+  --glow-green:    0 0 20px rgba(166,255,0,0.3), 0 0 40px rgba(166,255,0,0.1);
+
+  --transition:    all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* ─── BASE ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { min-height: 100vh; }
+
+/* ─── TYPOGRAPHY ────────────────────────────────────────────── */
+.font-orbitron { font-family: 'Orbitron', monospace; }
+.font-mono     { font-family: 'JetBrains Mono', monospace; }
+
+/* ─── GRIDS & OVERLAYS ──────────────────────────────────────── */
+.cyber-bg {
+  background:
+    radial-gradient(circle at center, rgba(17, 17, 17, 0.3) 0%, #050505 100%),
+    #050505;
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(255, 23, 68, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 23, 68, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.grid-overlay-fine {
+  background-image:
+    linear-gradient(rgba(255, 23, 68, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 23, 68, 0.015) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.moving-grid {
+  background-image:
+    linear-gradient(rgba(255, 107, 0, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 107, 0, 0.015) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: grid-scroll 35s linear infinite;
+}
+
+@keyframes grid-scroll {
+  from { background-position: 0 0; }
+  to { background-position: 0 1000px; }
+}
+
+/* ─── TACTICAL WIDGET SHAPES ────────────────────────────────── */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  transition: var(--transition);
+}
+
+.glass-hover:hover {
+  background: rgba(24, 24, 24, 0.95);
+  border-color: var(--neon-orange);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 12px rgba(255, 107, 0, 0.15);
+}
+
+.glass-glow-red {
+  border-color: rgba(255, 23, 68, 0.35);
+  box-shadow: 0 0 15px rgba(255, 23, 68, 0.15);
+}
+
+.glass-glow-orange {
+  border-color: rgba(255, 107, 0, 0.35);
+  box-shadow: 0 0 15px rgba(255, 107, 0, 0.15);
+}
+
+.glass-glow-green {
+  border-color: rgba(166, 255, 0, 0.35);
+  box-shadow: 0 0 15px rgba(166, 255, 0, 0.15);
+}
+
+/* ─── BUTTONS ───────────────────────────────────────────────── */
+.btn-cyber {
+  position: relative;
+  background: rgba(17, 17, 17, 0.9);
+  border: 1px solid rgba(255, 107, 0, 0.4);
+  color: var(--neon-orange);
+  padding: 10px 22px;
+  border-radius: var(--radius);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+}
+.btn-cyber:hover {
+  background: var(--neon-orange);
+  color: #000;
+  border-color: var(--neon-orange);
+  box-shadow: 0 0 15px rgba(255, 107, 0, 0.3);
+}
+
+.btn-primary-cyber {
+  background: var(--neon-red);
+  border: 1px solid var(--neon-red);
+  color: #050505;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+}
+.btn-primary-cyber:hover {
+  background: #EDEDED;
+  border-color: #EDEDED;
+  color: #050505;
+  box-shadow: 0 0 20px rgba(255, 23, 68, 0.4);
+}
+
+.btn-danger-cyber {
+  background: rgba(255, 23, 68, 0.1);
+  border: 1px solid var(--neon-red);
+  color: var(--neon-red);
+  padding: 10px 22px;
+  border-radius: var(--radius);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+}
+.btn-danger-cyber:hover {
+  background: var(--neon-red);
+  color: #000;
+  box-shadow: 0 0 15px rgba(255, 23, 68, 0.35);
+}
+
+/* ─── ANIMATIONS ────────────────────────────────────────────── */
+
+/* Tactical scanning infrared beam */
+@keyframes scan-beam {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(1000%); opacity: 0; }
+}
+
+@keyframes spin-slow    { to { transform: rotate(360deg); } }
+@keyframes spin-reverse { to { transform: rotate(-360deg); } }
+
+/* Radar sweep sector overlay */
+@keyframes radar-sweep {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Warning flicker */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  45%      { opacity: 1; }
+  46%      { opacity: 0.65; }
+  48%      { opacity: 0.95; }
+  49%      { opacity: 0.35; }
+  51%      { opacity: 0.85; }
+}
+
+/* Glitch text effect */
+@keyframes glitch-skew {
+  0%, 100% { transform: skew(0deg); }
+  10%      { transform: skew(-2deg); }
+  20%      { transform: skew(3deg); }
+  35%      { transform: skew(-3deg); }
+  60%      { transform: skew(1deg); }
+}
+
+/* Border alarm flash */
+@keyframes border-trace {
+  0%, 100% { border-color: rgba(255, 23, 68, 0.15); }
+  50%      { border-color: rgba(255, 23, 68, 0.6); }
+}
+
+.animate-scan-beam       { animation: scan-beam 3s linear infinite; }
+.animate-spin-slow       { animation: spin-slow 16s linear infinite; }
+.animate-spin-reverse    { animation: spin-reverse 10s linear infinite; }
+.animate-radar           { animation: radar-sweep 5s linear infinite; }
+.animate-flicker         { animation: flicker 6s ease-in-out infinite; }
+.animate-border-trace    { animation: border-trace 2s ease-in-out infinite; }
+
+/* ─── SCAN BEAM OVERLAYS ────────────────────────────────────── */
+.scan-beam-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,23,68,0) 10%,
+    rgba(255,23,68,0.8) 45%,
+    rgba(255,107,0,1) 50%,
+    rgba(255,23,68,0.8) 55%,
+    rgba(255,23,68,0) 90%,
+    transparent 100%
+  );
+  box-shadow: 0 0 15px rgba(255,23,68,0.6), 0 0 30px rgba(255,107,0,0.3);
+  z-index: 10;
+  animation: scan-beam 2.8s linear infinite;
+}
+
+/* Tactical reticle corners */
+.scan-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--neon-red);
+  border-style: solid;
+  opacity: 0.9;
+}
+.scan-corner-tl { top: 6px; left: 6px;  border-width: 2px 0 0 2px; }
+.scan-corner-tr { top: 6px; right: 6px; border-width: 2px 2px 0 0; }
+.scan-corner-bl { bottom: 6px; left: 6px;  border-width: 0 0 2px 2px; }
+.scan-corner-br { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
+
+/* ─── BADGES ────────────────────────────────────────────────── */
+.badge-fake {
+  background: rgba(255, 23, 68, 0.12);
+  border: 1px solid var(--neon-red);
+  color: var(--neon-red);
+  padding: 3px 12px;
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.badge-real {
+  background: rgba(166, 255, 0, 0.1);
+  border: 1px solid var(--neon-green);
+  color: var(--neon-green);
+  padding: 3px 12px;
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.badge-suspicious {
+  background: rgba(255, 196, 0, 0.1);
+  border: 1px solid var(--neon-amber);
+  color: var(--neon-amber);
+  padding: 3px 12px;
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+/* ─── METERS & PROGRESS ─────────────────────────────────────── */
+.cyber-progress {
+  height: 6px;
+  border-radius: 0px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  position: relative;
+}
+.cyber-progress-fill {
+  height: 100%;
+  position: relative;
+  transition: width 0.8s cubic-bezier(0.19,1,0.22,1);
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-void); }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 23, 68, 0.25);
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--neon-red); }
+
+/* ─── DROP ZONE ─────────────────────────────────────────────── */
+.drop-zone {
+  border: 1px dashed rgba(255, 107, 0, 0.35);
+  border-radius: var(--radius);
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.drop-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(255, 107, 0, 0.04), transparent 75%);
+  pointer-events: none;
+}
+.drop-zone:hover, .drop-zone.active {
+  border-color: var(--neon-orange);
+  background: rgba(255, 107, 0, 0.04);
+}
+.drop-zone.active { animation: border-trace 1s linear infinite; }
+
+/* ─── TABLE ─────────────────────────────────────────────────── */
+.cyber-table-row {
+  border-bottom: 1px solid rgba(255, 23, 68, 0.06);
+  transition: var(--transition);
+}
+.cyber-table-row:hover {
+  background: rgba(255, 23, 68, 0.03);
+  border-bottom-color: rgba(255, 23, 68, 0.2);
+}
+
+/* ─── FORENSIC TERMINAL FEED ────────────────────────────────── */
+.terminal-window {
+  background: rgba(5, 5, 5, 0.9);
+  border: 1px solid rgba(255, 23, 68, 0.25);
+  border-radius: var(--radius);
+  font-family: 'JetBrains Mono', monospace;
+}
+.terminal-line { font-size: 11px; line-height: 1.5; color: #AAAAAA; }
+
+/* ─── SKELETON ──────────────────────────────────────────────── */
+.cyber-skeleton {
+  background: linear-gradient(90deg,
+    rgba(255, 23, 68, 0.02) 25%,
+    rgba(255, 23, 68, 0.06) 50%,
+    rgba(255, 23, 68, 0.02) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  border-radius: var(--radius);
+}
+
+.glass-premium {
+  background: rgba(17, 17, 17, 0.95);
+  border: 1px solid rgba(255, 23, 68, 0.15);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  position: relative;
+  transition: var(--transition);
+}
+.glass-premium-hover:hover {
+  border-color: var(--neon-red);
+  box-shadow: 0 0 20px rgba(255, 23, 68, 0.15);
+}
+
+.glow-red-sm { filter: drop-shadow(0 0 3px var(--neon-red)); }
+.glow-orange-sm { filter: drop-shadow(0 0 3px var(--neon-orange)); }
+.glow-green-sm { filter: drop-shadow(0 0 3px var(--neon-green)); }
+.glow-amber-sm { filter: drop-shadow(0 0 3px var(--neon-amber)); }
