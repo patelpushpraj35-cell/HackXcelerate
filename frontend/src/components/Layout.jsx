@@ -1,154 +1,122 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Upload, BarChart3, Clock, ChevronLeft, ChevronRight,
-  Shield, Activity, Zap, LogOut, Bell, Search
-} from 'lucide-react'
+import { Upload, BarChart3, Clock, Shield, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'
 
 const NAV = [
-  { path: '/scan',      icon: Upload,    label: 'Scan Media',      sub: 'Upload & Analyze' },
-  { path: '/analytics', icon: BarChart3, label: 'Analytics',        sub: 'Forensic Intelligence' },
-  { path: '/history',   icon: Clock,     label: 'Scan History',    sub: 'Audit Records' },
+  { path: '/scan',      icon: Upload,    label: 'Scan Media' },
+  { path: '/analytics', icon: BarChart3, label: 'Analytics' },
+  { path: '/history',   icon: Clock,     label: 'History' },
 ]
 
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false)
-  const navigate  = useNavigate()
-  const location  = useLocation()
+  const navigate = useNavigate()
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#0B1220' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#F1F5F9' }}>
 
-      {/* ── Sidebar ── */}
-      <motion.aside
-        animate={{ width: collapsed ? 68 : 248 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="relative flex flex-col shrink-0 z-30 overflow-hidden"
-        style={{
-          background: 'rgba(17,24,39,0.98)',
-          borderRight: '1px solid rgba(255,255,255,0.07)',
-        }}
-      >
+      {/* ── Blue Sidebar ── */}
+      <div style={{
+        width: collapsed ? 64 : 220,
+        background: '#1E40AF',
+        display: 'flex',
+        flexDirection: 'column',
+        flexShrink: 0,
+        transition: 'width 0.25s ease',
+        position: 'relative',
+      }}>
         {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-5"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}>
-            <Shield size={16} className="text-blue-400" />
-          </div>
-          <AnimatePresence>
+        <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 8,
+              background: 'rgba(255,255,255,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}>
+              <Shield size={18} color="white" />
+            </div>
             {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.18 }}
-              >
-                <div className="text-sm font-bold text-white leading-tight">TruthLens AI</div>
-                <div className="text-xs mt-0.5" style={{ color: '#4B5563' }}>Deepfake Detection</div>
-              </motion.div>
+              <div>
+                <div style={{ color: 'white', fontWeight: 700, fontSize: 14, lineHeight: 1.2 }}>TruthLens AI</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11, marginTop: 2 }}>Deepfake Detection</div>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
         </div>
 
-        {/* Collapse toggle */}
+        {/* Collapse button */}
         <button
           onClick={() => setCollapsed(c => !c)}
-          className="absolute top-[22px] -right-3 w-6 h-6 rounded-full flex items-center justify-center z-40 cursor-pointer"
-          style={{ background: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#94A3B8' }}
-        >
-          {collapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
+          style={{
+            position: 'absolute', top: 22, right: -12,
+            width: 24, height: 24, borderRadius: '50%',
+            background: 'white', border: '1.5px solid #E2E8F0',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', zIndex: 10,
+          }}>
+          {collapsed ? <ChevronRight size={11} color="#64748B" /> : <ChevronLeft size={11} color="#64748B" />}
         </button>
 
-        {/* Nav */}
-        <nav className="flex-1 py-4 px-2 space-y-1">
-          {NAV.map(({ path, icon: Icon, label, sub }) => {
-            const isActive = location.pathname === path || (path !== '/' && location.pathname.startsWith(path))
-            return (
-              <NavLink
-                key={path}
-                to={path}
-                className={`nav-item ${isActive ? 'active' : ''}`}
-              >
-                <Icon size={17} className="shrink-0" />
-                <AnimatePresence>
-                  {!collapsed && (
-                    <motion.div
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    >
-                      <div className="text-sm font-medium leading-tight">{label}</div>
-                      <div className="text-xs mt-0.5" style={{ color: isActive ? '#60A5FA' : '#4B5563' }}>{sub}</div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </NavLink>
-            )
-          })}
+        {/* Nav items */}
+        <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {NAV.map(({ path, icon: Icon, label }) => (
+            <NavLink key={path} to={path}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+              <Icon size={17} style={{ flexShrink: 0 }} />
+              {!collapsed && <span>{label}</span>}
+            </NavLink>
+          ))}
         </nav>
 
-        {/* Version badge */}
-        <div className="px-3 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="flex items-center gap-2 pt-4">
-            <div className="status-dot online animate-pulse-soft shrink-0" />
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.div
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="text-xs" style={{ color: '#4B5563' }}
-                >
-                  Model online · v2.4.1
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        {/* Logout */}
+        <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+          <button
+            onClick={() => navigate('/')}
+            className="nav-link"
+            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <LogOut size={17} style={{ flexShrink: 0 }} />
+            {!collapsed && <span>Exit</span>}
+          </button>
         </div>
-      </motion.aside>
+      </div>
 
-      {/* ── Main ── */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      {/* ── Right side ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
-        {/* Topbar */}
-        <header className="flex items-center justify-between px-6 py-3 shrink-0"
-          style={{
-            background: 'rgba(17,24,39,0.95)',
-            borderBottom: '1px solid rgba(255,255,255,0.07)',
-            backdropFilter: 'blur(12px)',
-          }}>
-          <div className="flex items-center gap-2">
-            <Activity size={13} style={{ color: '#10B981' }} />
-            <span className="text-xs" style={{ color: '#4B5563' }}>
+        {/* ── Blue Header ── */}
+        <div style={{
+          background: '#2563EB',
+          padding: '0 28px',
+          height: 56,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: '#4ADE80',
+              boxShadow: '0 0 6px #4ADE80',
+            }} />
+            <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13 }}>
               All systems operational
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="badge badge-success text-xs">
-              <Zap size={10} />Model Active
-            </div>
-            <button
-              onClick={() => navigate('/')}
-              className="btn btn-ghost btn-sm"
-            >
-              <LogOut size={13} />
-              <span className="text-xs">Exit</span>
-            </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{
+              background: 'rgba(255,255,255,0.15)',
+              color: 'white', fontSize: 12, fontWeight: 600,
+              padding: '4px 12px', borderRadius: 20,
+            }}>
+              Model Active
+            </span>
           </div>
-        </header>
+        </div>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
-              className="p-6 lg:p-8"
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
+        {/* ── Page content ── */}
+        <main style={{ flex: 1, overflowY: 'auto', padding: 28 }}>
+          <Outlet />
         </main>
       </div>
     </div>

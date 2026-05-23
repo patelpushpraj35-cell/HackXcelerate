@@ -1,276 +1,204 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
-  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar,
+  AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
+  PieChart, Pie, Cell, BarChart, Bar,
 } from 'recharts'
-import {
-  Shield, AlertTriangle, CheckCircle, Zap,
-  TrendingUp, Activity, Clock,
-} from 'lucide-react'
+import { Shield, AlertTriangle, CheckCircle, Zap, TrendingUp, Activity } from 'lucide-react'
 import axios from 'axios'
 
-/* ── Tooltip styling ── */
-const TT = {
-  contentStyle: {
-    background: '#1E293B',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '10px',
-    color: '#E2E8F0',
-    fontSize: 12,
-    fontFamily: 'Inter, sans-serif',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-  },
-  labelStyle: { color: '#94A3B8' },
+const TOOLTIP_STYLE = {
+  contentStyle: { background: 'white', border: '1px solid #E2E8F0', borderRadius: 10, fontSize: 12, color: '#1E293B', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' },
 }
 
-const VERDICT_COLORS = {
-  MANIPULATED: '#EF4444',
-  SUSPICIOUS:  '#F59E0B',
-  AUTHENTIC:   '#10B981',
-}
-
-function normalize(raw) {
-  const weekly_trend = (raw.weekly_trend || []).map(d => ({
-    day: d.day || d.date || '—',
-    total: d.total || d.scans || 0,
-    fakes: d.fakes || 0,
-  }))
-  const rawThreat = raw.threat_distribution || {}
-  const TCOLORS = { LOW: '#10B981', MEDIUM: '#F59E0B', HIGH: '#F97316', CRITICAL: '#EF4444' }
-  const threat_distribution = Array.isArray(rawThreat)
-    ? rawThreat
-    : Object.entries(rawThreat).map(([name, value]) => ({ name, value, color: TCOLORS[name] || '#8B5CF6' }))
-  const deepfakes_found = raw.deepfakes_found ?? raw.fake_count ?? 0
-  const authentic_media = raw.authentic_media ?? raw.real_count ?? 0
-  const accuracy_rate   = raw.accuracy_rate   ?? raw.detection_accuracy ?? 94.7
-  const suspicious_count = raw.suspicious_count ?? 0
-  const verdict_breakdown = [
-    { name: 'Authentic',   value: authentic_media,  color: '#10B981' },
-    { name: 'Suspicious',  value: suspicious_count, color: '#F59E0B' },
-    { name: 'Manipulated', value: deepfakes_found,  color: '#EF4444' },
-  ]
-  return { ...raw, weekly_trend, threat_distribution, verdict_breakdown, deepfakes_found, authentic_media, accuracy_rate }
-}
-
-const DEMO = normalize({
-  total_scans: 23, fake_count: 11, real_count: 9, detection_accuracy: 94.7, suspicious_count: 3,
+const DEMO = {
+  total_scans: 23, deepfakes_found: 11, authentic_media: 9, accuracy_rate: 94.7, suspicious_count: 3,
   weekly_trend: [
-    { day: 'Mon', fakes: 4, total: 6  },
-    { day: 'Tue', fakes: 5, total: 13 },
-    { day: 'Wed', fakes: 3, total: 9  },
-    { day: 'Thu', fakes: 8, total: 15 },
-    { day: 'Fri', fakes: 6, total: 11 },
-    { day: 'Sat', fakes: 4, total: 8  },
-    { day: 'Sun', fakes: 5, total: 8  },
+    { day: 'Mon', total: 6,  fakes: 4  },
+    { day: 'Tue', total: 13, fakes: 5  },
+    { day: 'Wed', total: 9,  fakes: 3  },
+    { day: 'Thu', total: 15, fakes: 8  },
+    { day: 'Fri', total: 11, fakes: 6  },
+    { day: 'Sat', total: 8,  fakes: 4  },
+    { day: 'Sun', total: 8,  fakes: 5  },
   ],
-  threat_distribution: { LOW: 9, MEDIUM: 6, HIGH: 5, CRITICAL: 3 },
+  threat_distribution: [
+    { name: 'LOW',      value: 9,  color: '#059669' },
+    { name: 'MEDIUM',   value: 6,  color: '#D97706' },
+    { name: 'HIGH',     value: 5,  color: '#EA580C' },
+    { name: 'CRITICAL', value: 3,  color: '#DC2626' },
+  ],
+  verdict_breakdown: [
+    { name: 'Authentic',   value: 9,  color: '#059669' },
+    { name: 'Suspicious',  value: 3,  color: '#D97706' },
+    { name: 'Manipulated', value: 11, color: '#DC2626' },
+  ],
   recent_scans: [
-    { filename: 'interview_clip.mp4',  verdict: 'MANIPULATED', threat_level: 'CRITICAL', reality_score: 12.4, timestamp: new Date(Date.now()-1e6).toISOString() },
-    { filename: 'news_footage.mp4',    verdict: 'AUTHENTIC',   threat_level: 'LOW',      reality_score: 88.6, timestamp: new Date(Date.now()-2e6).toISOString() },
-    { filename: 'selfie_vid.mov',      verdict: 'SUSPICIOUS',  threat_level: 'MEDIUM',   reality_score: 51.2, timestamp: new Date(Date.now()-3e6).toISOString() },
-    { filename: 'press_conf.mp4',      verdict: 'MANIPULATED', threat_level: 'HIGH',     reality_score: 22.8, timestamp: new Date(Date.now()-5e6).toISOString() },
-    { filename: 'portrait.jpg',        verdict: 'AUTHENTIC',   threat_level: 'LOW',      reality_score: 91.3, timestamp: new Date(Date.now()-7e6).toISOString() },
+    { filename: 'interview_clip.mp4', verdict: 'MANIPULATED', threat_level: 'CRITICAL', reality_score: 12.4, timestamp: new Date(Date.now()-1e6).toISOString() },
+    { filename: 'news_footage.mp4',   verdict: 'AUTHENTIC',   threat_level: 'LOW',      reality_score: 88.6, timestamp: new Date(Date.now()-2e6).toISOString() },
+    { filename: 'selfie_vid.mov',     verdict: 'SUSPICIOUS',  threat_level: 'MEDIUM',   reality_score: 51.2, timestamp: new Date(Date.now()-3e6).toISOString() },
+    { filename: 'press_conf.mp4',     verdict: 'MANIPULATED', threat_level: 'HIGH',     reality_score: 22.8, timestamp: new Date(Date.now()-5e6).toISOString() },
+    { filename: 'portrait.jpg',       verdict: 'AUTHENTIC',   threat_level: 'LOW',      reality_score: 91.3, timestamp: new Date(Date.now()-7e6).toISOString() },
   ],
-})
+}
 
-const vColor = v => v === 'MANIPULATED' ? '#EF4444' : v === 'SUSPICIOUS' ? '#F59E0B' : '#10B981'
-const tColor = t => t === 'CRITICAL' ? '#EF4444' : t === 'HIGH' ? '#F97316' : t === 'MEDIUM' ? '#F59E0B' : '#10B981'
+const vColor = v => v === 'MANIPULATED' ? '#DC2626' : v === 'SUSPICIOUS' ? '#D97706' : '#059669'
+const vBg    = v => v === 'MANIPULATED' ? '#FEE2E2' : v === 'SUSPICIOUS' ? '#FEF3C7' : '#D1FAE5'
+const tColor = t => t === 'CRITICAL' ? '#DC2626' : t === 'HIGH' ? '#EA580C' : t === 'MEDIUM' ? '#D97706' : '#059669'
 
-function StatCard({ icon: Icon, label, value, delta, color, bg }) {
+function StatCard({ icon: Icon, label, value, iconBg, iconColor }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-      className="card p-5">
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: bg }}>
-          <Icon size={18} style={{ color }} />
-        </div>
-        {delta && (
-          <span className="text-xs font-medium" style={{ color: '#10B981' }}>
-            {delta}
-          </span>
-        )}
+    <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <div style={{ width: 46, height: 46, borderRadius: 10, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={20} color={iconColor} />
       </div>
-      <div className="text-2xl font-bold text-white mb-0.5" style={{ letterSpacing: '-0.02em' }}>{value}</div>
-      <div className="text-sm" style={{ color: '#6B7280' }}>{label}</div>
-    </motion.div>
+      <div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>{value}</div>
+        <div style={{ fontSize: 13, color: '#64748B', marginTop: 2 }}>{label}</div>
+      </div>
+    </div>
   )
 }
 
 export default function AnalyticsDashboard() {
-  const [data, setData]   = useState(DEMO)
-  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState(DEMO)
 
   useEffect(() => {
-    axios.get('/api/analytics/dashboard')
-      .then(r => setData(normalize(r.data)))
-      .catch(() => setData(DEMO))
-      .finally(() => setLoading(false))
+    axios.get('/api/analytics/dashboard').then(r => {
+      const d = r.data
+      setData({
+        total_scans: d.total_scans ?? DEMO.total_scans,
+        deepfakes_found: d.fake_count ?? DEMO.deepfakes_found,
+        authentic_media: d.real_count ?? DEMO.authentic_media,
+        accuracy_rate: d.detection_accuracy ?? DEMO.accuracy_rate,
+        suspicious_count: d.suspicious_count ?? DEMO.suspicious_count,
+        weekly_trend: d.weekly_trend || DEMO.weekly_trend,
+        threat_distribution: d.threat_distribution || DEMO.threat_distribution,
+        verdict_breakdown: DEMO.verdict_breakdown,
+        recent_scans: d.recent_scans || DEMO.recent_scans,
+      })
+    }).catch(() => setData(DEMO))
   }, [])
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="section-label mb-1">Analytics</div>
-          <h1 className="text-2xl font-bold text-white">Forensic Intelligence</h1>
-        </div>
-        <div className="flex items-center gap-2 badge badge-success">
-          <Activity size={12} />Live Data
-        </div>
+    <div>
+      {/* Page title */}
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>Analytics Dashboard</h1>
+        <p style={{ fontSize: 14, color: '#64748B' }}>Forensic intelligence and detection metrics.</p>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Shield}       label="Total Scans"  value={data.total_scans}           color="#3B82F6" bg="rgba(59,130,246,0.12)"  />
-        <StatCard icon={AlertTriangle} label="Deepfakes"   value={data.deepfakes_found}        color="#EF4444" bg="rgba(239,68,68,0.12)"   />
-        <StatCard icon={CheckCircle}  label="Authentic"    value={data.authentic_media}        color="#10B981" bg="rgba(16,185,129,0.12)"  />
-        <StatCard icon={Zap}          label="Accuracy"     value={`${data.accuracy_rate}%`}    color="#F59E0B" bg="rgba(245,158,11,0.12)"  />
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+        <StatCard icon={Shield}        label="Total Scans"  value={data.total_scans}       iconBg="#EFF6FF" iconColor="#2563EB" />
+        <StatCard icon={AlertTriangle} label="Deepfakes"    value={data.deepfakes_found}    iconBg="#FEE2E2" iconColor="#DC2626" />
+        <StatCard icon={CheckCircle}   label="Authentic"    value={data.authentic_media}    iconBg="#D1FAE5" iconColor="#059669" />
+        <StatCard icon={Zap}           label="Accuracy"     value={`${data.accuracy_rate}%`} iconBg="#FEF3C7" iconColor="#D97706" />
       </div>
 
-      {/* Charts grid */}
-      <div className="grid lg:grid-cols-12 gap-6">
+      {/* Charts row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, marginBottom: 20 }}>
 
-        {/* Left: Area chart + Recent scans */}
-        <div className="lg:col-span-8 space-y-6">
+        {/* Area chart */}
+        <div className="card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: '#0F172A' }}>Weekly Detection Trend</div>
+              <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 3 }}>Total scans vs deepfakes detected</div>
+            </div>
+            <TrendingUp size={16} color="#CBD5E1" />
+          </div>
+          <div style={{ height: 200 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data.weekly_trend}>
+                <defs>
+                  <linearGradient id="gTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gFakes" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#DC2626" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#DC2626" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                <XAxis dataKey="day" tick={{ fill: '#94A3B8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#94A3B8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip {...TOOLTIP_STYLE} />
+                <Area type="monotone" dataKey="total" name="Total Scans" stroke="#2563EB" fill="url(#gTotal)" strokeWidth={2} dot={false} />
+                <Area type="monotone" dataKey="fakes" name="Deepfakes"   stroke="#DC2626" fill="url(#gFakes)"  strokeWidth={2} dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-          {/* Weekly trend */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="card p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="font-semibold text-white">Weekly Detection Trend</h3>
-                <p className="text-xs mt-0.5" style={{ color: '#6B7280' }}>Deepfakes detected vs total scans</p>
+        {/* Donut chart */}
+        <div className="card">
+          <div style={{ fontWeight: 700, fontSize: 15, color: '#0F172A', marginBottom: 4 }}>Verdict Breakdown</div>
+          <div style={{ fontSize: 13, color: '#94A3B8', marginBottom: 16 }}>Classification results</div>
+          <div style={{ height: 150 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={data.verdict_breakdown} cx="50%" cy="50%" innerRadius={45} outerRadius={65} dataKey="value" strokeWidth={0}>
+                  {data.verdict_breakdown.map((e, i) => <Cell key={i} fill={e.color} />)}
+                </Pie>
+                <Tooltip {...TOOLTIP_STYLE} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+            {data.verdict_breakdown.map(({ name, value, color }) => (
+              <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+                  <span style={{ fontSize: 13, color: '#64748B' }}>{name}</span>
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{value}</span>
               </div>
-              <TrendingUp size={16} style={{ color: '#4B5563' }} />
-            </div>
-            <div className="h-52">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.weekly_trend}>
-                  <defs>
-                    <linearGradient id="gBlue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#3B82F6" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="gRed" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#EF4444" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="day" tick={{ fill: '#6B7280', fontSize: 11, fontFamily: 'Inter' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#6B7280', fontSize: 11, fontFamily: 'Inter' }} axisLine={false} tickLine={false} />
-                  <Tooltip {...TT} />
-                  <Area type="monotone" dataKey="total" name="Total Scans"    stroke="#3B82F6" fill="url(#gBlue)" strokeWidth={2} dot={false} />
-                  <Area type="monotone" dataKey="fakes" name="Deepfakes"      stroke="#EF4444" fill="url(#gRed)"  strokeWidth={2} dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-
-          {/* Recent scans */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-            className="card overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              <h3 className="font-semibold text-white text-sm">Recent Scans</h3>
-              <Clock size={14} style={{ color: '#4B5563' }} />
-            </div>
-            <div className="grid grid-cols-5 px-6 py-3 table-header"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              <span>Filename</span><span>Verdict</span><span>Threat</span><span>Score</span><span>Time</span>
-            </div>
-            {(data.recent_scans || []).map((s, i) => (
-              <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.04 * i }}
-                className="table-row grid grid-cols-5 px-6 py-3.5 items-center">
-                <span className="text-sm font-medium text-white truncate pr-4">{s.filename}</span>
-                <span className="text-xs font-semibold" style={{ color: vColor(s.verdict) }}>{s.verdict}</span>
-                <span className="text-xs font-semibold" style={{ color: tColor(s.threat_level) }}>{s.threat_level}</span>
-                <div className="flex items-center gap-2">
-                  <div className="progress-track w-14">
-                    <div className="progress-fill" style={{ width: `${s.reality_score}%`, background: vColor(s.verdict) }} />
-                  </div>
-                  <span className="text-xs font-semibold" style={{ color: vColor(s.verdict) }}>{s.reality_score?.toFixed(1)}</span>
-                </div>
-                <span className="text-xs" style={{ color: '#6B7280' }}>{new Date(s.timestamp).toLocaleString()}</span>
-              </motion.div>
             ))}
-          </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bar + Recent scans row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20 }}>
+
+        {/* Bar chart */}
+        <div className="card">
+          <div style={{ fontWeight: 700, fontSize: 15, color: '#0F172A', marginBottom: 4 }}>Threat Levels</div>
+          <div style={{ fontSize: 13, color: '#94A3B8', marginBottom: 16 }}>By severity</div>
+          <div style={{ height: 160 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data.threat_distribution} barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: '#94A3B8', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#94A3B8', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip {...TOOLTIP_STYLE} />
+                <Bar dataKey="value" radius={[5, 5, 0, 0]}>
+                  {data.threat_distribution.map((e, i) => <Cell key={i} fill={e.color} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        {/* Right: Pie + Bar */}
-        <div className="lg:col-span-4 space-y-5">
-
-          {/* Donut chart */}
-          <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-            className="card p-6">
-            <h3 className="font-semibold text-white text-sm mb-1">Verdict Distribution</h3>
-            <p className="text-xs mb-5" style={{ color: '#6B7280' }}>Classification breakdown</p>
-            <div className="h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={data.verdict_breakdown} cx="50%" cy="50%" innerRadius={52} outerRadius={72} dataKey="value" strokeWidth={0}>
-                    {data.verdict_breakdown.map((e, i) => <Cell key={i} fill={e.color} />)}
-                  </Pie>
-                  <Tooltip {...TT} />
-                </PieChart>
-              </ResponsiveContainer>
+        {/* Recent scans */}
+        <div className="card" style={{ padding: 0 }}>
+          <div style={{ padding: '18px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontWeight: 700, fontSize: 15, color: '#0F172A' }}>Recent Scans</div>
+            <Activity size={15} color="#CBD5E1" />
+          </div>
+          {/* Table header */}
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '10px 20px', borderBottom: '1px solid #F1F5F9', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#94A3B8' }}>
+            <span>File</span><span>Verdict</span><span>Score</span><span>Time</span>
+          </div>
+          {data.recent_scans.map((s, i) => (
+            <div key={i} className="table-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '12px 20px', alignItems: 'center' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: 12 }}>{s.filename}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: vColor(s.verdict), background: vBg(s.verdict), padding: '3px 8px', borderRadius: 20, display: 'inline-block' }}>{s.verdict}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: vColor(s.verdict) }}>{s.reality_score?.toFixed(1)}</span>
+              <span style={{ fontSize: 12, color: '#94A3B8' }}>{new Date(s.timestamp).toLocaleString()}</span>
             </div>
-            <div className="space-y-2 mt-4">
-              {data.verdict_breakdown.map(({ name, value, color }) => (
-                <div key={name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ background: color }} />
-                    <span className="text-xs" style={{ color: '#94A3B8' }}>{name}</span>
-                  </div>
-                  <span className="text-xs font-semibold text-white">{value}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Bar: threat distribution */}
-          <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
-            className="card p-6">
-            <h3 className="font-semibold text-white text-sm mb-1">Threat Levels</h3>
-            <p className="text-xs mb-5" style={{ color: '#6B7280' }}>By severity</p>
-            <div className="h-36">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.threat_distribution} barCategoryGap="35%">
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: '#6B7280', fontSize: 10, fontFamily: 'Inter' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: '#6B7280', fontSize: 10, fontFamily: 'Inter' }} axisLine={false} tickLine={false} />
-                  <Tooltip {...TT} />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {data.threat_distribution.map((e, i) => <Cell key={i} fill={e.color} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-
-          {/* Quick stats */}
-          <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 }}
-            className="card p-5">
-            <h3 className="font-semibold text-white text-sm mb-4">Platform Health</h3>
-            <div className="space-y-3">
-              {[
-                { label: 'Model Status',   val: 'Online',    color: '#10B981' },
-                { label: 'API Latency',    val: '~1.2s',     color: '#3B82F6' },
-                { label: 'Success Rate',   val: '99.2%',     color: '#8B5CF6' },
-                { label: 'Queue',          val: '0 pending', color: '#F59E0B' },
-              ].map(({ label, val, color }) => (
-                <div key={label} className="flex justify-between items-center py-1.5"
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <span className="text-xs" style={{ color: '#6B7280' }}>{label}</span>
-                  <span className="text-xs font-semibold" style={{ color }}>{val}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          ))}
         </div>
       </div>
     </div>

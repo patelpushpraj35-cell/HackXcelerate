@@ -1,61 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Clock, XCircle, CheckCircle, AlertTriangle,
-  Upload, ChevronRight, Search, Filter, TrendingUp,
+  CheckCircle, XCircle, AlertTriangle,
+  Search, Clock, Upload, ChevronRight
 } from 'lucide-react'
 import axios from 'axios'
 
-const DEMO_SCANS = [
-  { scan_id:'demo-1', filename:'interview_clip.mp4',  verdict:'MANIPULATED', threat_level:'CRITICAL', reality_score:12.4, timestamp: new Date(Date.now()-1e6).toISOString() },
-  { scan_id:'demo-2', filename:'news_footage.mp4',    verdict:'AUTHENTIC',   threat_level:'LOW',      reality_score:88.6, timestamp: new Date(Date.now()-2e6).toISOString() },
-  { scan_id:'demo-3', filename:'selfie_vid.mov',      verdict:'SUSPICIOUS',  threat_level:'MEDIUM',   reality_score:51.2, timestamp: new Date(Date.now()-3e6).toISOString() },
-  { scan_id:'demo-4', filename:'press_conf.mp4',      verdict:'MANIPULATED', threat_level:'HIGH',     reality_score:22.8, timestamp: new Date(Date.now()-5e6).toISOString() },
-  { scan_id:'demo-5', filename:'portrait.jpg',        verdict:'AUTHENTIC',   threat_level:'LOW',      reality_score:91.3, timestamp: new Date(Date.now()-7e6).toISOString() },
+const DEMO = [
+  { scan_id: 'demo-1', filename: 'interview_clip.mp4', verdict: 'MANIPULATED', threat_level: 'CRITICAL', reality_score: 12.4, timestamp: new Date(Date.now()-1e6).toISOString() },
+  { scan_id: 'demo-2', filename: 'news_footage.mp4',   verdict: 'AUTHENTIC',   threat_level: 'LOW',      reality_score: 88.6, timestamp: new Date(Date.now()-2e6).toISOString() },
+  { scan_id: 'demo-3', filename: 'selfie_vid.mov',     verdict: 'SUSPICIOUS',  threat_level: 'MEDIUM',   reality_score: 51.2, timestamp: new Date(Date.now()-3e6).toISOString() },
+  { scan_id: 'demo-4', filename: 'press_conf.mp4',     verdict: 'MANIPULATED', threat_level: 'HIGH',     reality_score: 22.8, timestamp: new Date(Date.now()-5e6).toISOString() },
+  { scan_id: 'demo-5', filename: 'portrait.jpg',       verdict: 'AUTHENTIC',   threat_level: 'LOW',      reality_score: 91.3, timestamp: new Date(Date.now()-7e6).toISOString() },
 ]
 
 const FILTERS = ['All', 'MANIPULATED', 'SUSPICIOUS', 'AUTHENTIC']
-
-const vColor = v => v === 'MANIPULATED' ? '#EF4444' : v === 'SUSPICIOUS' ? '#F59E0B' : '#10B981'
-const tColor = t => t === 'CRITICAL' ? '#EF4444' : t === 'HIGH' ? '#F97316' : t === 'MEDIUM' ? '#F59E0B' : '#10B981'
-
-const VerdictBadge = ({ v }) => {
-  const color = vColor(v)
-  const Icon  = v === 'MANIPULATED' ? XCircle : v === 'SUSPICIOUS' ? AlertTriangle : CheckCircle
-  return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-      style={{ background: `${color}14`, color, border: `1px solid ${color}30` }}>
-      <Icon size={11} />{v}
-    </span>
-  )
-}
-
-function SummaryCard({ label, value, color, bg }) {
-  return (
-    <div className="card p-4 text-center">
-      <div className="text-2xl font-bold mb-0.5" style={{ color, letterSpacing: '-0.02em' }}>{value}</div>
-      <div className="text-xs" style={{ color: '#6B7280' }}>{label}</div>
-    </div>
-  )
-}
-
-function ThreatBar({ label, pct, color }) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex justify-between text-xs">
-        <span style={{ color: '#94A3B8' }}>{label}</span>
-        <span className="font-semibold" style={{ color }}>{pct}%</span>
-      </div>
-      <div className="progress-track">
-        <motion.div className="progress-fill"
-          initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          style={{ background: color }} />
-      </div>
-    </div>
-  )
-}
+const vColor  = v => v === 'MANIPULATED' ? '#DC2626' : v === 'SUSPICIOUS' ? '#D97706' : '#059669'
+const vBg     = v => v === 'MANIPULATED' ? '#FEE2E2' : v === 'SUSPICIOUS' ? '#FEF3C7' : '#D1FAE5'
+const tColor  = t => t === 'CRITICAL' ? '#DC2626' : t === 'HIGH' ? '#EA580C' : t === 'MEDIUM' ? '#D97706' : '#059669'
 
 export default function ScanHistory() {
   const navigate = useNavigate()
@@ -67,7 +29,7 @@ export default function ScanHistory() {
   useEffect(() => {
     axios.get('/api/analytics/history')
       .then(r => setScans(r.data.scans || []))
-      .catch(() => setScans(DEMO_SCANS))
+      .catch(() => setScans(DEMO))
       .finally(() => setLoading(false))
   }, [])
 
@@ -75,171 +37,134 @@ export default function ScanHistory() {
     .filter(s => filter === 'All' || s.verdict === filter)
     .filter(s => !search || s.filename.toLowerCase().includes(search.toLowerCase()))
 
+  const total      = scans.length
   const fakes      = scans.filter(s => s.verdict === 'MANIPULATED').length
   const suspicious = scans.filter(s => s.verdict === 'SUSPICIOUS').length
   const authentic  = scans.filter(s => s.verdict === 'AUTHENTIC').length
-  const total      = scans.length || 1
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-
-      {/* Header */}
-      <div>
-        <div className="section-label mb-1">Audit Ledger</div>
-        <h1 className="text-2xl font-bold text-white">Scan History</h1>
-        <p className="mt-1 text-sm" style={{ color: '#94A3B8' }}>
-          Complete record of all analyzed media files and forensic verdicts.
-        </p>
+    <div>
+      {/* Page title */}
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>Scan History</h1>
+        <p style={{ fontSize: 14, color: '#64748B' }}>Complete audit log of all analyzed media files.</p>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8">
+      {/* Summary cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+        {[
+          { label: 'Total Scans', value: total,      color: '#2563EB', bg: '#EFF6FF' },
+          { label: 'Deepfakes',   value: fakes,      color: '#DC2626', bg: '#FEE2E2' },
+          { label: 'Suspicious',  value: suspicious,  color: '#D97706', bg: '#FEF3C7' },
+          { label: 'Authentic',   value: authentic,   color: '#059669', bg: '#D1FAE5' },
+        ].map(({ label, value, color, bg }) => (
+          <div key={label} className="card" style={{ textAlign: 'center', padding: 20 }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{value}</div>
+            <div style={{ fontSize: 13, color: '#64748B', marginTop: 4 }}>{label}</div>
+          </div>
+        ))}
+      </div>
 
-        {/* Left: Table */}
-        <div className="lg:col-span-8 space-y-5">
-
-          {/* Toolbar */}
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#4B5563' }} />
-              <input
-                className="input pl-9"
-                placeholder="Search by filename..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-1.5">
-              {FILTERS.map(f => {
-                const active = filter === f
-                return (
-                  <button key={f} onClick={() => setFilter(f)}
-                    className="btn btn-sm"
-                    style={{
-                      background: active ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.04)',
-                      border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                      color: active ? '#60A5FA' : '#94A3B8',
-                      fontSize: '12px', padding: '6px 12px',
-                    }}>
-                    {f}
-                  </button>
-                )
-              })}
-            </div>
+      {/* Main table card */}
+      <div className="card" style={{ padding: 0 }}>
+        {/* Toolbar */}
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Search */}
+          <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+            <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+            <input className="input" style={{ paddingLeft: 36, fontSize: 13 }}
+              placeholder="Search by filename..."
+              value={search} onChange={e => setSearch(e.target.value)} />
           </div>
 
-          {/* Table */}
-          <div className="card overflow-hidden">
-            {/* Header */}
-            <div className="grid grid-cols-5 px-6 py-3 table-header"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              <span className="col-span-2">Filename</span>
-              <span>Verdict</span>
-              <span>Reality Score</span>
-              <span>Scanned</span>
-            </div>
-
-            {loading ? (
-              <div className="p-6 space-y-3">
-                {Array(5).fill(0).map((_, i) => <div key={i} className="skeleton h-12 rounded-xl" />)}
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="p-16 text-center">
-                <Clock size={36} style={{ color: '#374151', margin: '0 auto 12px' }} />
-                <div className="font-semibold text-white mb-1">No records found</div>
-                <div className="text-sm mb-6" style={{ color: '#4B5563' }}>
-                  {search ? 'Try a different search term' : 'Analyze your first media file to get started'}
-                </div>
-                <button onClick={() => navigate('/scan')} className="btn btn-primary btn-sm mx-auto">
-                  <Upload size={14} />Start Scanning
-                </button>
-              </div>
-            ) : (
-              <AnimatePresence>
-                {filtered.map((s, i) => (
-                  <motion.div key={s.scan_id || i}
-                    initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                    className="table-row grid grid-cols-5 px-6 py-4 items-center cursor-pointer group"
-                    onClick={() => navigate(`/result/${s.scan_id}`)}>
-
-                    <div className="col-span-2 flex items-center gap-3 pr-4">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: `${vColor(s.verdict)}12` }}>
-                        {s.verdict === 'MANIPULATED' ? <XCircle size={13} style={{ color: vColor(s.verdict) }} />
-                          : s.verdict === 'SUSPICIOUS' ? <AlertTriangle size={13} style={{ color: vColor(s.verdict) }} />
-                          : <CheckCircle size={13} style={{ color: vColor(s.verdict) }} />}
-                      </div>
-                      <span className="font-medium text-sm text-white truncate">{s.filename}</span>
-                    </div>
-
-                    <VerdictBadge v={s.verdict} />
-
-                    <div className="flex items-center gap-2.5">
-                      <div className="progress-track w-16">
-                        <div className="progress-fill" style={{ width: `${s.reality_score}%`, background: vColor(s.verdict) }} />
-                      </div>
-                      <span className="text-xs font-semibold" style={{ color: vColor(s.verdict) }}>
-                        {s.reality_score?.toFixed(1)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: '#6B7280' }}>
-                        {new Date(s.timestamp).toLocaleString()}
-                      </span>
-                      <ChevronRight size={13} style={{ color: '#374151' }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            )}
-
-            {filtered.length > 0 && (
-              <div className="px-6 py-3 text-xs" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', color: '#4B5563' }}>
-                Showing {filtered.length} of {scans.length} records
-              </div>
-            )}
+          {/* Filter buttons */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            {FILTERS.map(f => (
+              <button key={f} onClick={() => setFilter(f)}
+                style={{
+                  padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                  border: `1.5px solid ${filter === f ? '#2563EB' : '#E2E8F0'}`,
+                  background: filter === f ? '#EFF6FF' : 'white',
+                  color: filter === f ? '#2563EB' : '#64748B',
+                  cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                }}>
+                {f}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Right: Sidebar */}
-        <div className="lg:col-span-4 space-y-5">
-
-          {/* Summary counts */}
-          <div className="grid grid-cols-3 gap-3">
-            <SummaryCard label="Fakes"      value={fakes}      color="#EF4444" />
-            <SummaryCard label="Suspicious" value={suspicious}  color="#F59E0B" />
-            <SummaryCard label="Authentic"  value={authentic}   color="#10B981" />
-          </div>
-
-          {/* Threat distribution */}
-          <div className="card p-5">
-            <h3 className="font-semibold text-white text-sm mb-4 flex items-center gap-2">
-              <TrendingUp size={14} className="text-blue-400" />Threat Distribution
-            </h3>
-            <div className="space-y-4">
-              <ThreatBar label="Critical / High" pct={Math.round(((scans.filter(s => ['CRITICAL','HIGH'].includes(s.threat_level)).length) / total) * 100)} color="#EF4444" />
-              <ThreatBar label="Medium Risk"      pct={Math.round(((scans.filter(s => s.threat_level === 'MEDIUM').length) / total) * 100)} color="#F59E0B" />
-              <ThreatBar label="Low / Safe"       pct={Math.round(((scans.filter(s => s.threat_level === 'LOW').length) / total) * 100)} color="#10B981" />
-            </div>
-          </div>
-
-          {/* Activity feed */}
-          <div className="card p-5">
-            <h3 className="font-semibold text-white text-sm mb-4">Recent Activity</h3>
-            <div className="space-y-3">
-              {DEMO_SCANS.slice(0, 4).map((s, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: vColor(s.verdict) }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium text-white truncate">{s.filename}</div>
-                    <div className="text-xs mt-0.5" style={{ color: vColor(s.verdict) }}>{s.verdict}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Table header */}
+        <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1.2fr 1.5fr 48px', padding: '10px 20px', borderBottom: '1px solid #F1F5F9', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#94A3B8' }}>
+          <span>Filename</span><span>Verdict</span><span>Threat</span><span>Reality Score</span><span>Scanned At</span><span />
         </div>
+
+        {/* Loading */}
+        {loading && (
+          <div style={{ padding: 24 }}>
+            {[1,2,3,4].map(i => <div key={i} className="skeleton" style={{ height: 48, marginBottom: 8 }} />)}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && filtered.length === 0 && (
+          <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+            <Clock size={40} style={{ color: '#E2E8F0', margin: '0 auto 12px' }} />
+            <div style={{ fontWeight: 600, color: '#1E293B', marginBottom: 6 }}>No records found</div>
+            <div style={{ fontSize: 14, color: '#94A3B8', marginBottom: 20 }}>
+              {search ? 'Try a different search term.' : 'Analyze your first file to see records here.'}
+            </div>
+            <button onClick={() => navigate('/scan')} className="btn btn-blue" style={{ margin: '0 auto', fontSize: 13, padding: '9px 20px' }}>
+              <Upload size={14} /> Start Scanning
+            </button>
+          </div>
+        )}
+
+        {/* Rows */}
+        {!loading && filtered.map((s, i) => {
+          const Icon = s.verdict === 'MANIPULATED' ? XCircle : s.verdict === 'SUSPICIOUS' ? AlertTriangle : CheckCircle
+          return (
+            <div key={s.scan_id || i} className="table-row"
+              style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1.2fr 1.5fr 48px', padding: '14px 20px', alignItems: 'center', cursor: 'pointer' }}
+              onClick={() => navigate(`/result/${s.scan_id}`)}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingRight: 12 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: vBg(s.verdict), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={14} color={vColor(s.verdict)} />
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {s.filename}
+                </span>
+              </div>
+
+              <span style={{ fontSize: 12, fontWeight: 700, color: vColor(s.verdict), background: vBg(s.verdict), padding: '4px 10px', borderRadius: 20, display: 'inline-block' }}>
+                {s.verdict}
+              </span>
+
+              <span style={{ fontSize: 13, fontWeight: 700, color: tColor(s.threat_level) }}>
+                {s.threat_level}
+              </span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="progress-track" style={{ width: 60 }}>
+                  <div className="progress-fill" style={{ width: `${s.reality_score}%`, background: vColor(s.verdict) }} />
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: vColor(s.verdict) }}>{s.reality_score?.toFixed(1)}</span>
+              </div>
+
+              <span style={{ fontSize: 12, color: '#94A3B8' }}>{new Date(s.timestamp).toLocaleString()}</span>
+
+              <ChevronRight size={15} color="#CBD5E1" />
+            </div>
+          )
+        })}
+
+        {/* Footer count */}
+        {!loading && filtered.length > 0 && (
+          <div style={{ padding: '12px 20px', borderTop: '1px solid #F1F5F9', fontSize: 12, color: '#94A3B8' }}>
+            Showing {filtered.length} of {scans.length} records
+          </div>
+        )}
       </div>
     </div>
   )
