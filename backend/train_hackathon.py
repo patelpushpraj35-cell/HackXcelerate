@@ -119,8 +119,9 @@ def main():
     
     train_generator = train_datagen.flow_from_directory(
         os.path.join(split_dir, "train"),
-        target_size=(224, 224),
+        target_size=(299, 299),
         batch_size=16,
+        classes=['real', 'fake'],
         class_mode='binary',
         shuffle=True,
         seed=42
@@ -128,8 +129,9 @@ def main():
     
     validation_generator = val_datagen.flow_from_directory(
         os.path.join(split_dir, "validation"),
-        target_size=(224, 224),
+        target_size=(299, 299),
         batch_size=16,
+        classes=['real', 'fake'],
         class_mode='binary',
         shuffle=False,
         seed=42
@@ -137,7 +139,7 @@ def main():
     
     # 3. Model Building & Compilation
     print("\n--- Step 3: Compiling XceptionNet Model Architecture ---")
-    model = build_xception_model(input_shape=(224, 224, 3))
+    model = build_xception_model(input_shape=(299, 299, 3))
     
     # Ensure app/models directory exists
     os.makedirs("app/models", exist_ok=True)
@@ -167,7 +169,7 @@ def main():
     print("\n--- Step 4: Starting Model Training ---")
     history = model.fit(
         train_generator,
-        epochs=5,
+        epochs=10,
         validation_data=validation_generator,
         callbacks=[checkpoint, early_stopping],
         verbose=1

@@ -220,7 +220,7 @@ def prepare_dataset(videos_dir: str, output_dataset_dir: str, label: str, max_fr
                 cropped = crop_face(frame_img, bbox)
                 if cropped is not None:
                     # Resize to standard size (we save as raw images, train generator handles rescaling)
-                    resized = cv2.resize(cropped, (224, 224), interpolation=cv2.INTER_CUBIC)
+                    resized = cv2.resize(cropped, (299, 299), interpolation=cv2.INTER_CUBIC)
                     
                     # Generate unique file name
                     video_name = os.path.splitext(video_file)[0]

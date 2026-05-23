@@ -16,7 +16,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-def build_xception_model(input_shape=(224, 224, 3)) -> Model:
+def build_xception_model(input_shape=(299, 299, 3)) -> Model:
     """
     Builds the Xception model for transfer learning.
     
@@ -99,7 +99,7 @@ def build_mobilenetv2_model(input_shape=(224, 224, 3)) -> Model:
     logger.info(f"MobileNetV2 model summary:\n{model.summary()}")
     return model
 
-def get_data_generators(dataset_dir: str, target_size=(224, 224), batch_size=32, validation_split=0.2):
+def get_data_generators(dataset_dir: str, target_size=(299, 299), batch_size=32, validation_split=0.2):
     """
     Creates training and validation data generators with data augmentation.
     
@@ -140,6 +140,7 @@ def get_data_generators(dataset_dir: str, target_size=(224, 224), batch_size=32,
         dataset_dir,
         target_size=target_size,
         batch_size=batch_size,
+        classes=['real', 'fake'],
         class_mode='binary',
         subset='training',
         shuffle=True,
@@ -151,6 +152,7 @@ def get_data_generators(dataset_dir: str, target_size=(224, 224), batch_size=32,
         dataset_dir,
         target_size=target_size,
         batch_size=batch_size,
+        classes=['real', 'fake'],
         class_mode='binary',
         subset='validation',
         shuffle=False,

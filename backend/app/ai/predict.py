@@ -87,7 +87,8 @@ def predict_single_face(face_img: np.ndarray, model: tf.keras.Model, model_type:
         float: Probability that the face is FAKE (0.0 to 1.0).
     """
     # Preprocess image (BGR to RGB -> Resize -> Scale to [-1, 1] -> Expand dim)
-    tensor = preprocess_face(face_img, target_size=(224, 224), model_type=model_type)
+    target_size = (299, 299) if model_type == 'xception' else (224, 224)
+    tensor = preprocess_face(face_img, target_size=target_size, model_type=model_type)
     if tensor is None:
         return 0.0
         
